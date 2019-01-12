@@ -19,7 +19,11 @@ class StashConfig:
         'database': {
             'name': 'database.db',
             'token': '',
-        }
+        },
+        'web': {
+            'title': 'Stash',
+            'description': 'Store your favorite Git repositories in Stash.',
+        },
     }
 
     def __init__(self, config_name):
@@ -35,6 +39,8 @@ class StashConfig:
                 self._parse_main(conf, section)
             elif section == 'database':
                 self._parse_database(conf, section)
+            elif section == 'web':
+                self._parse_web(conf, section)
             else:
                 raise StashConfigException('Invalid section in config file: "{}"'.format(section))
 
@@ -54,6 +60,13 @@ class StashConfig:
             if key == 'name':
                 self.config[section][key] = conf[section][key]
             elif key == 'token':
+                self.config[section][key] = conf[section][key]
+            else:
+                raise StashConfigException('Found invalid key "{}" in "{}" section'.format(key, section))
+
+    def _parse_web(self, conf, section):
+        for key in conf[section]:
+            if key == 'title':
                 self.config[section][key] = conf[section][key]
             else:
                 raise StashConfigException('Found invalid key "{}" in "{}" section'.format(key, section))

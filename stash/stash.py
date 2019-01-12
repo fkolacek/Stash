@@ -6,10 +6,10 @@
 import logging
 
 
-from flask import Flask, request, make_response, jsonify
+from flask import Flask, request, make_response, jsonify, render_template, send_from_directory
 from git import Repo
 
-from .exception import StashException
+from .exception import StashException, StashDatabaseException
 from .config import StashConfig
 from .database import StashDatabase
 
@@ -39,10 +39,14 @@ class Stash:
         self.app = Flask(__name__.split('.')[0])
 
         self.app.add_url_rule('/', 'process_index', self.process_index)
+        self.app.add_url_rule('/detail/<path:path>', 'process_detail', self.process_detail)
+        self.app.add_url_rule('/about', 'process_about', self.process_about)
+        self.app.add_url_rule('/static/<path:path>', 'process_static', self.process_static)
+
         self.app.add_url_rule('/add', 'process_add', self.process_add, methods=['POST'])
         self.app.add_url_rule('/delete', 'process_delete', self.process_delete, methods=['POST'])
         self.app.add_url_rule('/repo', 'process_repo', self.process_repo, methods=['GET', 'POST'])
-        self.app.add_url_rule('/repos', 'process)repos', self.process_repos)
+        self.app.add_url_rule('/repos', 'process_repos', self.process_repos)
 
     def run(self):
         logging.info('Starting application')
@@ -54,26 +58,47 @@ class Stash:
         return auth
 
     def process_index(self):
-        logging.info('Processing index')
+        return render_template('index.html', web=self.config['web'])
 
-        return make_response('This is private stash, there is nothing for you, go away!', 200)
+    def process_detail(self, path):
+        try:
+            with StashDatabase(**self.config['database']) as db:
+                if not db.is_repo(path):
+                    return render_template('index.html', web=self.config['web'], error='Not found')
+
+                repo = db.get_repo(path)
+
+                return render_template('detail.html', web=self.config['web'], repo=repo)
+        except StashDatabaseException as e:
+            logging.error(e)
+            return make_response('Internal Server Error', 500)
+
+    def process_about(self):
+        return render_template('about.html', web=self.config['web'])
+
+    def process_static(self, path):
+        return send_from_directory('static', path)
 
     def process_add(self):
         if not self.authorized(request.form.get('token')):
             return make_response('Unauthorized', 401)
 
         name = request.form.get('name')
-        type_ = request.form.get('type')
+        t = request.form.get('type')
         remote = request.form.get('remote')
         description = request.form.get('description')
 
-        if not all[name, type_, remote]:
+        if not all([name, t, remote]):
             return make_response('Invalid request', 400)
 
-        with StashDatabase(**self.config['database']) as db:
-            db.add_repo(name, type_, remote, description)
+        try:
+            with StashDatabase(**self.config['database']) as db:
+                db.add_repo(name, t, remote, description)
 
-        return make_response('Success', 200)
+            return make_response('Success', 200)
+        except StashDatabaseException as e:
+            logging.error(e)
+            return make_response('Internal Server Error', 500)
 
     def process_delete(self):
         logging.info('Processing delete')
@@ -86,25 +111,38 @@ class Stash:
         if not name:
             return make_response('Invalid request', 400)
 
-        with StashDatabase(**self.config['database']) as db:
-            db.del_repo(name)
+        try:
+            with StashDatabase(**self.config['database']) as db:
+                db.del_repo(name)
 
-        return make_response('Success', 200)
+            return make_response('Success', 200)
+        except StashDatabaseException as e:
+            logging.error(e)
+            return make_response('Internal Server Error', 500)
 
     def process_repo(self):
         logging.info('Processing repo')
 
-        name = request.form.get('name')
+        name = request.args.get('name') if request.method == 'GET' else request.form.get('name')
 
-        with StashDatabase(**self.config['database']) as db:
-            repo = db.get_repo(name)
+        try:
+            with StashDatabase(**self.config['database']) as db:
+                repo = db.get_repo(name)
 
-        return jsonify(repo)
+            return jsonify(repo)
+        except StashDatabaseException as e:
+            logging.error(e)
+            return make_response('Internal Server Error', 500)
 
     def process_repos(self):
         logging.info('Processing repos')
 
-        with StashDatabase(**self.config['database']) as db:
-            repos = db.get_repos()
+        try:
+            with StashDatabase(**self.config['database']) as db:
+                repos = db.get_repos()
 
-        return jsonify(repos)
+            return jsonify(repos)
+        except StashDatabaseException as e:
+            logging.error(e)
+            return make_response('Internal Server Error', 500)
+
