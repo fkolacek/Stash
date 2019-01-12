@@ -106,14 +106,14 @@ class Stash:
         if not self.authorized(request.form.get('token')):
             return make_response('Unauthorized', 401)
 
-        name = request.form.get('name')
+        id_ = request.form.get('id')
 
-        if not name:
+        if not id_:
             return make_response('Invalid request', 400)
 
         try:
             with StashDatabase(**self.config['database']) as db:
-                db.del_repo(name)
+                db.del_repo(id_)
 
             return make_response('Success', 200)
         except StashDatabaseException as e:
@@ -123,11 +123,11 @@ class Stash:
     def process_repo(self):
         logging.info('Processing repo')
 
-        name = request.args.get('name') if request.method == 'GET' else request.form.get('name')
+        id_ = request.args.get('id') if request.method == 'GET' else request.form.get('id')
 
         try:
             with StashDatabase(**self.config['database']) as db:
-                repo = db.get_repo(name)
+                repo = db.get_repo(id_)
 
             return jsonify(repo)
         except StashDatabaseException as e:

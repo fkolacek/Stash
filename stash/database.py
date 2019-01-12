@@ -63,22 +63,22 @@ class StashDatabase:
     def is_token(self, token):
         return self.query_exists('SELECT COUNT(*) FROM tokens WHERE token = ?', [token])
 
-    def is_repo(self, name):
-        return self.query_exists('SELECT COUNT(*) FROM repos WHERE name = ?', [name])
+    def is_repo(self, id):
+        return self.query_exists('SELECT COUNT(*) FROM repos WHERE id = ?', [id])
 
     def add_repo(self, name, type, remote, description):
         sql = 'INSERT INTO repos (name, type, remote, description, created, score) VALUES (?, ?, ?, ?, ?, ?)'
 
         self.query(sql, [name, type, remote, description, self.get_now(), 0])
 
-    def del_repo(self, name):
-        self.query('DELETE FROM repos WHERE name = ?', [name])
+    def del_repo(self, id):
+        self.query('DELETE FROM repos WHERE id = ?', [id])
 
-    def get_repo(self, name):
-        if not self.is_repo(name):
+    def get_repo(self, id):
+        if not self.is_repo(id):
             return None
 
-        result = self.query('SELECT id, name, type, remote, description, created, updated, score FROM repos WHERE name = ?', [name])
+        result = self.query('SELECT id, name, type, remote, description, created, updated, score FROM repos WHERE id = ?', [id])
 
         return self.dict_from_row(result.fetchone())
 

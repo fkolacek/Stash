@@ -7,7 +7,7 @@
             $.each(data, function (i, item) {
                 $("<tr>").append(
                     $("<td>").text(item.id),
-                    $("<td>").append($("<a>", {href: '/detail/' + item.name, text: item.name})),
+                    $("<td>").append($("<a>", {href: '/detail/' + item.id, text: item.name})),
                     $("<td>").text(item.type),
                     $("<td>").text(item.description),
                     $("<td>").text(item.created),
