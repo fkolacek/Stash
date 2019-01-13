@@ -5,9 +5,7 @@
 
 import logging
 
-
 from flask import Flask, request, make_response, jsonify, render_template, send_from_directory
-from git import Repo
 
 from .exception import StashException, StashDatabaseException
 from .config import StashConfig
@@ -40,6 +38,7 @@ class Stash:
 
         self.app.add_url_rule('/', 'process_index', self.process_index)
         self.app.add_url_rule('/detail/<path:path>', 'process_detail', self.process_detail)
+        self.app.add_url_rule('/new', 'process_new', self.process_new)
         self.app.add_url_rule('/about', 'process_about', self.process_about)
         self.app.add_url_rule('/static/<path:path>', 'process_static', self.process_static)
 
@@ -64,7 +63,7 @@ class Stash:
         try:
             with StashDatabase(**self.config['database']) as db:
                 if not db.is_repo(path):
-                    return render_template('index.html', web=self.config['web'], error='Not found')
+                    return render_template('index.html', web=self.config['web'], error='Requested repository doesn\'t exist!')
 
                 repo = db.get_repo(path)
 
@@ -72,6 +71,9 @@ class Stash:
         except StashDatabaseException as e:
             logging.error(e)
             return make_response('Internal Server Error', 500)
+
+    def process_new(self):
+        return render_template('new.html', web=self.config['web'])
 
     def process_about(self):
         return render_template('about.html', web=self.config['web'])

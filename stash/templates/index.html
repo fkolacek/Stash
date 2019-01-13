@@ -1,22 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{{ web.description }}">
-    <link rel="icon" href="/static/favicon.ico">
-    <title>{{ web.title }}</title>
-    <link href="/static/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/bootstrap-theme.min.css" rel="stylesheet">
-    <link href="/static/ie10-viewport-bug-workaround.css" rel="stylesheet">
-    <link href="/static/theme.css" rel="stylesheet">
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
@@ -31,7 +14,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/create">Create</a></li>
+                <li><a href="/new">New</a></li>
                 <li><a href="/about">About</a></li>
             </ul>
         </div>
@@ -41,6 +24,11 @@
     <div class="page-header">
         <h1>Stashed repositories</h1>
     </div>
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+    {{ error }}
+    </div>
+    {% endif %}
     <div class="row">
         <div class="xcol-md-6">
             <table class="table" id="stash">
@@ -63,16 +51,11 @@
         </div>
     </div>
 </div>
-<script src="/static/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="/staticjquery.min.js"><\/script>')</script>
-<script src="/static/bootstrap.min.js"></script>
-<script src="/static/docs.min.js"></script>
-<script src="/static/ie10-viewport-bug-workaround.js"></script>
-<script type="text/javascript" src="/static/scripts.js"></script>
+{% endblock %}
+{% block custom_scripts %}
 <script type="text/javascript">
-    $(document).ready(function () {
+    $(document).ready(function(){
         show_repositories();
     });
 </script>
-</body>
-</html>
+{% endblock %}

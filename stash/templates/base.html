@@ -1,0 +1,35 @@
+{% block header %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ web.description }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="icon" href="/static/favicon.ico">
+    <title>{{ web.title }}</title>
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="/static/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <link href="/static/theme.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+{% endblock %}
+{% block content %}{% endblock %}
+{% block footer %}
+<script src="/static/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/staticjquery.min.js"><\/script>')</script>
+<script src="/static/bootstrap.min.js"></script>
+<script src="/static/docs.min.js"></script>
+<script src="/static/ie10-viewport-bug-workaround.js"></script>
+<script type="text/javascript" src="/static/scripts.js"></script>
+{% block custom_scripts %}{% endblock %}
+</body>
+</html>
+{% endblock %}

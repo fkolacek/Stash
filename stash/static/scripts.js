@@ -15,7 +15,6 @@
                 ).appendTo('table#stash tbody');
 
                 counter++;
-                console.log(item);
             });
 
             if (counter == 0) {
