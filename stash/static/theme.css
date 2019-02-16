@@ -16,3 +16,5 @@ body {
 .theme-showcase .navbar .container {
   width: auto;
 }
+
+.border-error{ border: 1px solid red; }

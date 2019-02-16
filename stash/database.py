@@ -44,7 +44,7 @@ class StashDatabase:
 
         self.query("""CREATE TABLE IF NOT EXISTS repos (
                       id INTEGER PRIMARY KEY,
-                      name TEXT NOT NULL UNIQUE,
+                      name TEXT NOT NULL,
                       type TEXT NOT NULL,
                       remote TEXT NOT NULL,
                       description TEXT,

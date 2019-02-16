@@ -5,7 +5,7 @@
 
 import logging
 
-from flask import Flask, request, make_response, jsonify, render_template, send_from_directory
+from flask import Flask, request, make_response, jsonify, render_template, send_from_directory, redirect, url_for, flash
 
 from .exception import StashException, StashDatabaseException
 from .config import StashConfig
@@ -35,6 +35,7 @@ class Stash:
 
     def init_app(self):
         self.app = Flask(__name__.split('.')[0])
+        self.app.secret_key = self.config['web']['secret_key']
 
         self.app.add_url_rule('/', 'process_index', self.process_index)
         self.app.add_url_rule('/detail/<path:path>', 'process_detail', self.process_detail)
@@ -57,13 +58,21 @@ class Stash:
         return auth
 
     def process_index(self):
-        return render_template('index.html', web=self.config['web'])
+        try:
+            with StashDatabase(**self.config['database']) as db:
+                repos = db.get_repos()
+
+                return render_template('index.html', web=self.config['web'], repos=repos)
+        except StashDatabaseException as e:
+            logging.error(e)
+            return make_response('Internal Server Error', 500)
 
     def process_detail(self, path):
         try:
             with StashDatabase(**self.config['database']) as db:
                 if not db.is_repo(path):
-                    return render_template('index.html', web=self.config['web'], error='Requested repository doesn\'t exist!')
+                    flash('Repository does not exist!', 'danger')
+                    return redirect(url_for('.process_index'))
 
                 repo = db.get_repo(path)
 
@@ -82,8 +91,14 @@ class Stash:
         return send_from_directory('static', path)
 
     def process_add(self):
+        webui = request.form.get('webui', False)
+
         if not self.authorized(request.form.get('token')):
-            return make_response('Unauthorized', 401)
+            if webui is False:
+                return make_response('Unauthorized', 401)
+            else:
+                flash('Unauthorized!', 'danger')
+                return redirect(url_for('.process_new'))
 
         name = request.form.get('name')
         t = request.form.get('type')
@@ -97,7 +112,11 @@ class Stash:
             with StashDatabase(**self.config['database']) as db:
                 db.add_repo(name, t, remote, description)
 
-            return make_response('Success', 200)
+            if webui is False:
+                return make_response('Success', 200)
+
+            flash('Repository has been added successfully!', 'success')
+            return redirect(url_for('.process_new'))
         except StashDatabaseException as e:
             logging.error(e)
             return make_response('Internal Server Error', 500)

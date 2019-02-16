@@ -1,29 +1,22 @@
-    function show_repositories() {
-        $.get("/repos", function (data) {
-            var counter = 0;
 
-            $("table#stash tbody").empty();
+    function validate_form_new(form){
+        var inputs = [
+            $(form).find("input[name=token]"),
+            $(form).find("input[name=name]"),
+            $(form).find("input[name=remote]"),
+            $(form).find("input[name=type]"),
+            $(form).find("textarea[name=description]")
+        ];
+        var result = true;
 
-            $.each(data, function (i, item) {
-                $("<tr>").append(
-                    $("<td>").text(item.id),
-                    $("<td>").append($("<a>", {href: '/detail/' + item.id, text: item.name})),
-                    $("<td>").text(item.type),
-                    $("<td>").text(item.description),
-                    $("<td>").text(item.created),
-                    $("<td>").text(item.score)
-                ).appendTo('table#stash tbody');
-
-                counter++;
-            });
-
-            if (counter == 0) {
-                $("<tr>").append(
-                    $("<td>")
-                        .attr('colspan', 5)
-                        .addClass('text-center')
-                        .text('There are no stashed projects yet!')
-                ).appendTo('table#stash tbody');
+        $.each(inputs, function(index, value){
+            if($(value).val() == ""){
+                $(value).addClass('border-error');
+                result = false;
             }
+            else
+                $(value).removeClass('border-error');
         });
+
+        return result;
     }

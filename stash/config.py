@@ -23,6 +23,7 @@ class StashConfig:
         'web': {
             'title': 'Stash',
             'description': 'Store your favorite Git repositories in Stash.',
+            'secret_key': 'super_secret_key',
         },
     }
 
@@ -67,6 +68,8 @@ class StashConfig:
     def _parse_web(self, conf, section):
         for key in conf[section]:
             if key == 'title':
+                self.config[section][key] = conf[section][key]
+            elif key == 'secret_key':
                 self.config[section][key] = conf[section][key]
             else:
                 raise StashConfigException('Found invalid key "{}" in "{}" section'.format(key, section))

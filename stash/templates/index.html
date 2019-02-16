@@ -24,11 +24,15 @@
     <div class="page-header">
         <h1>Stashed repositories</h1>
     </div>
-    {% if error %}
-    <div class="alert alert-danger" role="alert">
-    {{ error }}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
     </div>
-    {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="row">
         <div class="xcol-md-6">
             <table class="table" id="stash">
@@ -43,19 +47,23 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% for repo in repos %}
                 <tr>
-                    <td colspan="5" class="text-center">Loading..</td>
+                    <td>{{ repo.id }}</td>
+                    <td><a href="/detail/{{ repo.id }}">{{ repo.name }}</a></td>
+                    <td>{{ repo.type }}</td>
+                    <td>{{ repo.description }}</td>
+                    <td>{{ repo.created }}</td>
+                    <td>{{ repo.score }}</td>
                 </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No stored repositories!</td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-{% endblock %}
-{% block custom_scripts %}
-<script type="text/javascript">
-    $(document).ready(function(){
-        show_repositories();
-    });
-</script>
 {% endblock %}
